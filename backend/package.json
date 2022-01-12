@@ -1,0 +1,26 @@
+{
+  "name": "registee",
+  "version": "1.0.0",
+  "description": "registee test app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umtate/registee.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/umtate/registee/issues"
+  },
+  "homepage": "https://github.com/umtate/registee#readme",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.2",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
