@@ -26,12 +26,7 @@ router.get("/raw", async (req, res) => {
 });
 
 router.get("/students", tokenAuth, async (req, res) => {
-  let result = [];
-  await getData(varsityUrls)
-    .then((results) => results.forEach((res) => result.push(res.value.data)))
-    .catch((err) => console.log(err));
-
-  res.json(result);
+  createResponse(varsityUrls, res);
 });
 
 const getData = async (urls) => {
@@ -45,7 +40,7 @@ const getData = async (urls) => {
 const createResponse = async (urls, res) => {
   let temp = [];
   let results = [];
-  await Object.entries(urls).forEach(async ([varKey, varValue]) => {
+  Object.entries(urls).forEach(async ([varKey, varValue]) => {
     await getData(varValue)
       .then(async (response) => {
         response.forEach((val) => {
@@ -65,6 +60,7 @@ const createResponse = async (urls, res) => {
             }
           });
         });
+
         res.json(results);
       })
       .catch((err) => res.status(500).json({ error: "something went wrong" }));
