@@ -1,14 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
 import axios from "axios";
 import Search from "../components/Search";
 
 const Students = () => {
+  const [data, setData] = useState([]);
   useEffect(() => {
     axios
       .get("http://localhost:3000/students")
-      .then((val) => console.log(val.data));
-  });
+      .then((val) => setData(val.data));
+  }, []);
 
   return (
     <>
@@ -23,23 +24,18 @@ const Students = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td colSpan={2}>Larry the Bird</td>
-            <td>@twitter</td>
-          </tr>
+          {data.map((item, i) => {
+            return (
+              <>
+                <tr>
+                  <td>{item.student_id}</td>
+                  <td>{item.name}</td>
+                  <td>{item.university}</td>
+                  <td>{item.mark}</td>
+                </tr>
+              </>
+            );
+          })}
         </tbody>
       </Table>
     </>
