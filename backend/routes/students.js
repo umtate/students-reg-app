@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const axios = require("axios");
 const axiosRetry = require("axios-retry");
+const tokenAuth = require("../middleware/jwtAuthToken");
+const authenticate = require("../services/auth");
 
 const varsityUrls = {
   uj: [
@@ -14,11 +16,13 @@ const varsityUrls = {
 };
 
 router.get("/raw", async (req, res) => {
-  let results = [];
-
-  createResponse(varsityUrls)
-    .then((val) => res.json(val))
-    .catch((err) => res.status(err));
+  if (req.headers.authorization) {
+    authenticate(req)
+      ? createResponse(varsityUrls, res)
+      : res.status(403).json({ errr: "No credentials sent" });
+  } else {
+    res.status(403).json({ error: "Not authorised" });
+  }
 });
 
 router.get("/students", tokenAuth, async (req, res) => {
@@ -38,28 +42,32 @@ const getData = async (urls) => {
   return Promise.allSettled(promise);
 };
 
-const createResponse = async (urls) => {
+const createResponse = async (urls, res) => {
   let temp = [];
   let results = [];
-  return await Object.entries(urls).map(async ([varKey, varValue]) => {
-    await getData(varValue).then(async (response) => {
-      response.forEach((val) => {
-        temp.push(val.value.data);
-      });
-      await Object.entries(temp[0]).forEach(async ([markKey, marksVal]) => {
-        await Object.entries(temp[1]).forEach(([namesKey, namesVal]) => {
-          if (markKey === namesKey) {
-            results.push({
-              student_id: namesKey,
-              university: varKey,
-              name: namesVal,
-              mark: marksVal,
-            });
-          }
+  await Object.entries(urls).forEach(async ([varKey, varValue]) => {
+    await getData(varValue)
+      .then(async (response) => {
+        response.forEach((val) => {
+          temp.push(val.value.data);
         });
-      });
-    });
-    return results;
+      })
+      .then(() => {
+        Object.entries(temp[0]).forEach(async ([markKey, marksVal]) => {
+          Object.entries(temp[1]).map(([namesKey, namesVal]) => {
+            if (markKey === namesKey) {
+              results.push({
+                student_id: namesKey,
+                university: varKey,
+                name: namesVal,
+                mark: marksVal,
+              });
+            }
+          });
+        });
+        res.json(results);
+      })
+      .catch((err) => res.status(500).json({ error: "something went wrong" }));
   });
 };
 
